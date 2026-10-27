@@ -11,6 +11,7 @@ import { ProtectedRoute } from './components/atoms/ProtectedRoute';
 import { HomePage } from './components/pages/HomePage';
 import { StorePage } from './components/pages/StorePage';
 import { ServicesPage } from './components/pages/ServicesPage';
+import { NosotrosPage } from './components/pages/NosotrosPage';
 import { CartPage } from './components/pages/CartPage';
 import { LoginPage } from './components/pages/LoginPage';
 import { AdminPage } from './components/pages/AdminPage';
@@ -100,6 +101,7 @@ export const App: React.FC = () => {
           <Route index element={<HomePage />} />
           <Route path="tienda" element={<StorePage onAddToCart={handleAddToCart} />} />
           <Route path="servicios" element={<ServicesPage />} />
+          <Route path="nosotros" element={<NosotrosPage />} />
           <Route
             path="carrito"
             element={
