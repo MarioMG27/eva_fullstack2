@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { User } from '../../types';
 import { Button } from '../atoms/Button';
 
-
 interface NavbarProps {
   cartCount: number;
   user: User | null;
@@ -60,6 +59,11 @@ export const Navbar: React.FC<NavbarProps> = ({ cartCount, user, onLogout }) => 
             </li>
 
             {/* Accesos especiales según rol del usuario */}
+            {(user?.rol === 'cliente' || user?.rol === 'admin') && (
+              <li className="nav-item">
+                <Link className="nav-link text-success fw-bold" to="/perfil">Mi Perfil</Link>
+              </li>
+            )}
             {user?.rol === 'admin' && (
               <li className="nav-item">
                 <Link className="nav-link text-warning fw-bold" to="/admin">Panel Admin</Link>
