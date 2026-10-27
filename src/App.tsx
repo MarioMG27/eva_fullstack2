@@ -17,6 +17,7 @@ import { CartPage } from './components/pages/CartPage';
 import { LoginPage } from './components/pages/LoginPage';
 import { AdminPage } from './components/pages/AdminPage';
 import { RecepcionistaPage } from './components/pages/RecepcionistaPage';
+import { ClientePerfilPage } from './components/pages/ClientePerfilPage';
 
 export const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -104,6 +105,14 @@ export const App: React.FC = () => {
           <Route path="servicios" element={<ServicesPage />} />
           <Route path="nosotros" element={<NosotrosPage />} />
           <Route path="contacto" element={<ContactoPage />} />
+          <Route
+            path="perfil"
+            element={
+              <ProtectedRoute user={user} allowedRoles={['cliente', 'admin']}>
+                <ClientePerfilPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="carrito"
             element={
