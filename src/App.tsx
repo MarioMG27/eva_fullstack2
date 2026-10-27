@@ -3,13 +3,14 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import type { User, CartItem, Product } from './types';
 import { authService, cartService } from './services/authService';
 
-// Plantillas y Átomos
+// Layout y Componentes
 import { PublicLayout } from './components/templates/PublicLayout';
 import { ProtectedRoute } from './components/atoms/ProtectedRoute';
 
-// Páginas
+// Vistas / Páginas
 import { HomePage } from './components/pages/HomePage';
 import { StorePage } from './components/pages/StorePage';
+import { ServicesPage } from './components/pages/ServicesPage';
 import { CartPage } from './components/pages/CartPage';
 import { LoginPage } from './components/pages/LoginPage';
 import { AdminPage } from './components/pages/AdminPage';
@@ -20,11 +21,15 @@ export const App: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
+    try {
+      const currentUser = authService.getCurrentUser();
+      setUser(currentUser);
 
-    const currentCart = cartService.getCart();
-    setCart(currentCart);
+      const currentCart = cartService.getCart();
+      setCart(currentCart);
+    } catch (e) {
+      console.error("Error al cargar datos iniciales:", e);
+    }
   }, []);
 
   const handleLoginSuccess = (loggedUser: User) => {
@@ -36,7 +41,6 @@ export const App: React.FC = () => {
     setUser(null);
   };
 
-  // Funcionalidades del Carrito
   const handleAddToCart = (product: Product) => {
     setCart((prevCart) => {
       const existingIndex = prevCart.findIndex((item) => item.product.id === product.id);
@@ -95,6 +99,7 @@ export const App: React.FC = () => {
         >
           <Route index element={<HomePage />} />
           <Route path="tienda" element={<StorePage onAddToCart={handleAddToCart} />} />
+          <Route path="servicios" element={<ServicesPage />} />
           <Route
             path="carrito"
             element={
@@ -108,7 +113,6 @@ export const App: React.FC = () => {
           />
           <Route path="login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
 
-          {/* Rutas Protegidas por Rol */}
           <Route
             path="admin"
             element={
