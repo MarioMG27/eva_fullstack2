@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Button } from '../atoms/Button';
+import { TarjetaServicio, type ServicioItem } from '../molecules/TarjetaServicio';
 import { ModuloAgendamiento } from '../organisms/ModuloAgendamiento';
-import type { ServiceItem } from '../organisms/ModuloAgendamiento';
 
-const SERVICES: ServiceItem[] = [
+const SERVICIOS: ServicioItem[] = [
   {
     id: 1,
     titulo: 'Consulta Médica General',
@@ -35,7 +34,7 @@ const SERVICES: ServiceItem[] = [
 ];
 
 export const ServicesPage: React.FC = () => {
-  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
+  const [servicioSeleccionado, setServicioSeleccionado] = useState<ServicioItem | null>(null);
 
   return (
     <div className="py-3">
@@ -46,38 +45,20 @@ export const ServicesPage: React.FC = () => {
         </p>
       </div>
 
-      {/* Tarjetas de Servicios */}
       <div className="row row-cols-1 row-cols-md-2 g-4 mb-5">
-        {SERVICES.map((servicio) => (
+        {SERVICIOS.map((servicio) => (
           <div key={servicio.id} className="col">
-            <div className="card h-100 shadow-sm border-0 p-3 bg-light">
-              <div className="card-body d-flex flex-column">
-                <div className="d-flex align-items-center gap-3 mb-3">
-                  <span className="display-5">{servicio.icono}</span>
-                  <div>
-                    <h5 className="fw-bold text-dark mb-0">{servicio.titulo}</h5>
-                    <span className="badge bg-primary mt-1">{servicio.precio}</span>
-                  </div>
-                </div>
-                <p className="text-muted small flex-grow-1">{servicio.descripcion}</p>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  className="mt-2 w-100"
-                  onClick={() => setSelectedService(servicio)}
-                >
-                  Agendar Atención
-                </Button>
-              </div>
-            </div>
+            <TarjetaServicio
+              servicio={servicio}
+              onSeleccionar={(s) => setServicioSeleccionado(s)}
+            />
           </div>
         ))}
       </div>
 
-      {/* Organismo ModuloAgendamiento */}
       <ModuloAgendamiento
-        service={selectedService}
-        onClose={() => setSelectedService(null)}
+        service={servicioSeleccionado}
+        onClose={() => setServicioSeleccionado(null)}
       />
     </div>
   );

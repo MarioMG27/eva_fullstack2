@@ -1,40 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { authService } from '../../services/authService';
 import { Button } from '../atoms/Button';
+import { FichaMascota, type RegistroMascota } from '../organisms/FichaMascota';
+import { TablaHorasAgendadas, type Cita } from '../organisms/TablaHorasAgendadas';
+import { HistorialComprasTabla, type CompraHistorial } from '../organisms/HistorialComprasTabla';
+import { FormularioAgregarMascota } from '../organisms/FormularioAgregarMascota';
 
-interface Appointment {
-  id: number;
-  servicio: string;
-  paciente: string;
-  fecha: string;
-  hora: string;
-  estado: 'Pendiente' | 'Atendido' | 'Cancelado';
-}
-
-interface PetRecord {
-  id: number;
-  nombre: string;
-  especie: string;
-  raza: string;
-  edad: string;
-  vacunas: { nombre: string; fecha: string; estado: 'Al día' | 'Pendiente' }[];
-}
-
-interface PurchaseHistory {
-  id: string;
-  fecha: string;
-  total: number;
-  items: string[];
-  estado: 'Entregado' | 'En proceso';
-}
-
-// Datos iniciales de respaldo por defecto
-const DEFAULT_APPOINTMENTS: Appointment[] = [
+const DEFAULT_CITAS: Cita[] = [
   { id: 101, servicio: 'Consulta Médica General', paciente: 'Max', fecha: '2026-10-30', hora: '10:00', estado: 'Pendiente' },
   { id: 102, servicio: 'Vacunación y Desparasitación', paciente: 'Luna', fecha: '2026-11-05', hora: '15:30', estado: 'Pendiente' },
 ];
 
-const DEFAULT_PETS: PetRecord[] = [
+const DEFAULT_MASCOTAS: RegistroMascota[] = [
   {
     id: 1,
     nombre: 'Max',
@@ -60,7 +37,7 @@ const DEFAULT_PETS: PetRecord[] = [
   },
 ];
 
-const DEFAULT_PURCHASES: PurchaseHistory[] = [
+const DEFAULT_COMPRAS: CompraHistorial[] = [
   {
     id: 'ORD-8921',
     fecha: '2026-10-20',
@@ -72,55 +49,64 @@ const DEFAULT_PURCHASES: PurchaseHistory[] = [
 
 export const ClientePerfilPage: React.FC = () => {
   const [user, setUser] = useState(authService.getCurrentUser());
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [pets, setPets] = useState<PetRecord[]>([]);
-  const [purchases, setPurchases] = useState<PurchaseHistory[]>([]);
-  const [activeTab, setActiveTab] = useState<'citas' | 'mascotas' | 'compras'>('citas');
+  const [citas, setCitas] = useState<Cita[]>([]);
+  const [mascotas, setMascotas] = useState<RegistroMascota[]>([]);
+  const [compras, setCompras] = useState<CompraHistorial[]>([]);
+  const [pestanaActiva, setPestanaActiva] = useState<'citas' | 'mascotas' | 'compras'>('citas');
+  const [mostrarModalAgregar, setMostrarModalAgregar] = useState(false);
 
   useEffect(() => {
-    // 1. Cargar usuario actual
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
+    setUser(authService.getCurrentUser());
 
-    // 2. Cargar o inicializar citas en LocalStorage
-    const savedApps = localStorage.getItem('petshop_user_appointments');
-    if (savedApps) {
-      setAppointments(JSON.parse(savedApps));
+    const savedCitas = localStorage.getItem('petshop_user_appointments');
+    if (savedCitas) {
+      setCitas(JSON.parse(savedCitas));
     } else {
-      localStorage.setItem('petshop_user_appointments', JSON.stringify(DEFAULT_APPOINTMENTS));
-      setAppointments(DEFAULT_APPOINTMENTS);
+      localStorage.setItem('petshop_user_appointments', JSON.stringify(DEFAULT_CITAS));
+      setCitas(DEFAULT_CITAS);
     }
 
-    // 3. Cargar mascotas
-    const savedPets = localStorage.getItem('petshop_user_pets');
-    if (savedPets) {
-      setPets(JSON.parse(savedPets));
+    const savedMascotas = localStorage.getItem('petshop_user_pets');
+    if (savedMascotas) {
+      setMascotas(JSON.parse(savedMascotas));
     } else {
-      localStorage.setItem('petshop_user_pets', JSON.stringify(DEFAULT_PETS));
-      setPets(DEFAULT_PETS);
+      localStorage.setItem('petshop_user_pets', JSON.stringify(DEFAULT_MASCOTAS));
+      setMascotas(DEFAULT_MASCOTAS);
     }
 
-    // 4. Cargar compras
-    const savedPurchases = localStorage.getItem('petshop_user_purchases');
-    if (savedPurchases) {
-      setPurchases(JSON.parse(savedPurchases));
+    const savedCompras = localStorage.getItem('petshop_user_purchases');
+    if (savedCompras) {
+      setCompras(JSON.parse(savedCompras));
     } else {
-      localStorage.setItem('petshop_user_purchases', JSON.stringify(DEFAULT_PURCHASES));
-      setPurchases(DEFAULT_PURCHASES);
+      localStorage.setItem('petshop_user_purchases', JSON.stringify(DEFAULT_COMPRAS));
+      setCompras(DEFAULT_COMPRAS);
     }
   }, []);
 
-  const handleCancelAppointment = (id: number) => {
-    const updated = appointments.map((app) =>
-      app.id === id ? { ...app, estado: 'Cancelado' as const } : app
+  const handleCancelarCita = (id: number) => {
+    const actualizadas = citas.map((c) =>
+      c.id === id ? { ...c, estado: 'Cancelado' as const } : c
     );
-    setAppointments(updated);
-    localStorage.setItem('petshop_user_appointments', JSON.stringify(updated));
+    setCitas(actualizadas);
+    localStorage.setItem('petshop_user_appointments', JSON.stringify(actualizadas));
+  };
+
+  const handleConfirmarCita = (id: number) => {
+    const actualizadas = citas.map((c) =>
+      c.id === id ? { ...c, estado: 'Confirmado' as const } : c
+    );
+    setCitas(actualizadas);
+    localStorage.setItem('petshop_user_appointments', JSON.stringify(actualizadas));
+  };
+
+  const handleAgregarMascota = (nuevaMascota: RegistroMascota) => {
+    const actualizadas = [...mascotas, nuevaMascota];
+    setMascotas(actualizadas);
+    localStorage.setItem('petshop_user_pets', JSON.stringify(actualizadas));
   };
 
   return (
     <div className="py-3">
-      {/* Encabezado del Perfil */}
       <div className="bg-dark text-white p-4 rounded mb-4 shadow-sm d-flex align-items-center justify-content-between">
         <div>
           <h2 className="fw-bold mb-1">👤 Mi Perfil de Cliente</h2>
@@ -131,160 +117,77 @@ export const ClientePerfilPage: React.FC = () => {
         <span className="badge bg-success px-3 py-2 fs-6">Cliente Activo</span>
       </div>
 
-      {/* Pestañas de Navegación del Perfil */}
       <ul className="nav nav-tabs mb-4 border-bottom">
         <li className="nav-item">
           <button
-            className={`nav-link fw-bold ${activeTab === 'citas' ? 'active text-primary' : 'text-secondary'}`}
-            onClick={() => setActiveTab('citas')}
+            className={`nav-link fw-bold ${pestanaActiva === 'citas' ? 'active text-primary' : 'text-secondary'}`}
+            onClick={() => setPestanaActiva('citas')}
           >
-            📅 Mis Horas Agendadas ({appointments.length})
+            📅 Mis Horas Agendadas ({citas.length})
           </button>
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link fw-bold ${activeTab === 'mascotas' ? 'active text-primary' : 'text-secondary'}`}
-            onClick={() => setActiveTab('mascotas')}
+            className={`nav-link fw-bold ${pestanaActiva === 'mascotas' ? 'active text-primary' : 'text-secondary'}`}
+            onClick={() => setPestanaActiva('mascotas')}
           >
-            🐾 Ficha de Mascotas y Vacunas ({pets.length})
+            🐾 Ficha de Mascotas y Vacunas ({mascotas.length})
           </button>
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link fw-bold ${activeTab === 'compras' ? 'active text-primary' : 'text-secondary'}`}
-            onClick={() => setActiveTab('compras')}
+            className={`nav-link fw-bold ${pestanaActiva === 'compras' ? 'active text-primary' : 'text-secondary'}`}
+            onClick={() => setPestanaActiva('compras')}
           >
-            🛍️ Historial de Compras ({purchases.length})
+            🛍️ Historial de Compras ({compras.length})
           </button>
         </li>
       </ul>
 
-      {/* Sección 1: Citas y Horas Agendadas */}
-      {activeTab === 'citas' && (
+      {pestanaActiva === 'citas' && (
         <div className="card shadow-sm border-0 p-4">
           <h4 className="fw-bold mb-3">Mis Citas Médicas</h4>
-          {appointments.length === 0 ? (
-            <div className="alert alert-info text-center py-4">
-              No tienes citas registradas por el momento.
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th>Servicio</th>
-                    <th>Mascota</th>
-                    <th>Fecha</th>
-                    <th>Hora</th>
-                    <th>Estado</th>
-                    <th className="text-end">Acción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.map((app) => (
-                    <tr key={app.id}>
-                      <td className="fw-semibold">{app.servicio}</td>
-                      <td>{app.paciente}</td>
-                      <td>{app.fecha}</td>
-                      <td>{app.hora} hrs</td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            app.estado === 'Atendido'
-                              ? 'bg-success'
-                              : app.estado === 'Cancelado'
-                              ? 'bg-danger'
-                              : 'bg-warning text-dark'
-                          }`}
-                        >
-                          {app.estado}
-                        </span>
-                      </td>
-                      <td className="text-end">
-                        {app.estado === 'Pendiente' ? (
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => handleCancelAppointment(app.id)}
-                          >
-                            Cancelar Hora
-                          </Button>
-                        ) : (
-                          <span className="text-muted small">Sin acciones</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <TablaHorasAgendadas
+            citas={citas}
+            onCancelarCita={handleCancelarCita}
+            onConfirmarCita={handleConfirmarCita}
+          />
+        </div>
+      )}
+
+      {pestanaActiva === 'mascotas' && (
+        <div>
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h4 className="fw-bold mb-0">Mis Mascotas Registradas</h4>
+            <Button
+              variant="primary"
+              onClick={() => setMostrarModalAgregar(true)}
+            >
+              ➕ Registrar Nueva Mascota
+            </Button>
+          </div>
+
+          <div className="row row-cols-1 row-cols-md-2 g-4">
+            {mascotas.map((mascota) => (
+              <div key={mascota.id} className="col">
+                <FichaMascota mascota={mascota} />
+              </div>
+            ))}
+          </div>
+
+          {mostrarModalAgregar && (
+            <FormularioAgregarMascota
+              onAgregar={handleAgregarMascota}
+              onCerrar={() => setMostrarModalAgregar(false)}
+            />
           )}
         </div>
       )}
 
-      {/* Sección 2: Fichas de Mascotas y Estado de Vacunas */}
-      {activeTab === 'mascotas' && (
-        <div className="row row-cols-1 row-cols-md-2 g-4">
-          {pets.map((pet) => (
-            <div key={pet.id} className="col">
-              <div className="card shadow-sm border-0 p-4 bg-light h-100">
-                <div className="d-flex align-items-center gap-3 mb-3">
-                  <span className="fs-1">{pet.especie === 'Canino' ? '🐶' : '🐱'}</span>
-                  <div>
-                    <h4 className="fw-bold mb-0 text-dark">{pet.nombre}</h4>
-                    <p className="text-muted small mb-0">{pet.especie} • {pet.raza} ({pet.edad})</p>
-                  </div>
-                </div>
-
-                <h6 className="fw-bold text-primary mt-2 mb-2">Esquema de Vacunación:</h6>
-                <ul className="list-group list-group-flush rounded shadow-sm">
-                  {pet.vacunas.map((vac, idx) => (
-                    <li key={idx} className="list-group-item d-flex justify-content-between align-items-center">
-                      <div>
-                        <strong>{vac.nombre}</strong>
-                        <div className="text-muted small">Última dosis: {vac.fecha}</div>
-                      </div>
-                      <span className={`badge ${vac.estado === 'Al día' ? 'bg-success' : 'bg-warning text-dark'}`}>
-                        {vac.estado}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Sección 3: Historial de Compras */}
-      {activeTab === 'compras' && (
+      {pestanaActiva === 'compras' && (
         <div className="card shadow-sm border-0 p-4">
           <h4 className="fw-bold mb-3">Historial de Compras de Productos</h4>
-          {purchases.length === 0 ? (
-            <div className="alert alert-info text-center py-4">
-              Aún no has realizado compras en nuestra tienda.
-            </div>
-          ) : (
-            <div className="d-flex flex-column gap-3">
-              {purchases.map((ord) => (
-                <div key={ord.id} className="border p-3 rounded bg-light d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-                  <div>
-                    <div className="d-flex align-items-center gap-2 mb-1">
-                      <span className="fw-bold text-primary">{ord.id}</span>
-                      <span className="text-muted small">• {ord.fecha}</span>
-                      <span className="badge bg-success">{ord.estado}</span>
-                    </div>
-                    <div className="small text-secondary">
-                      {ord.items.join(', ')}
-                    </div>
-                  </div>
-                  <div className="fw-bold fs-5 text-dark mt-2 mt-md-0">
-                    ${ord.total.toLocaleString('es-CL')}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <HistorialComprasTabla compras={compras} />
         </div>
       )}
     </div>
