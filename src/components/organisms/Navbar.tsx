@@ -58,23 +58,26 @@ export const Navbar: React.FC<NavbarProps> = ({ cartCount, user, onLogout }) => 
               <Link className="nav-link" to="/contacto">Contacto</Link>
             </li>
 
-            {/* Accesos especiales según rol del usuario */}
-            {(user?.rol === 'cliente' || user?.rol === 'admin') && (
+            {/* Accesos de navegación estrictamente por ROL */}
+            {user?.rol === 'cliente' && (
               <li className="nav-item">
                 <Link className="nav-link text-success fw-bold" to="/perfil">Mi Perfil</Link>
               </li>
             )}
+
             {user?.rol === 'admin' && (
               <li className="nav-item">
                 <Link className="nav-link text-warning fw-bold" to="/admin">Panel Admin</Link>
               </li>
             )}
+
             {user?.rol === 'recepcionista' && (
               <li className="nav-item">
                 <Link className="nav-link text-info fw-bold" to="/recepcionista">Panel Recepción</Link>
               </li>
             )}
-            {(user?.rol === 'veterinario' || user?.rol === 'admin') && (
+
+            {user?.rol === 'veterinario' && (
               <li className="nav-item">
                 <Link className="nav-link text-primary fw-bold" to="/veterinario">Panel Veterinario</Link>
               </li>

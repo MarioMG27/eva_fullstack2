@@ -102,7 +102,17 @@ export const App: React.FC = () => {
           }
         >
           <Route index element={<HomePage />} />
-          <Route path="tienda" element={<StorePage onAddToCart={handleAddToCart} />} />
+          <Route
+            path="tienda"
+            element={
+              <StorePage
+                cart={cart}
+                onAddToCart={handleAddToCart}
+                onUpdateQuantity={handleUpdateQuantity}
+                onRemoveItem={handleRemoveItem}
+              />
+            }
+          />
           <Route path="servicios" element={<ServicesPage />} />
           <Route path="nosotros" element={<NosotrosPage />} />
           <Route path="contacto" element={<ContactoPage />} />

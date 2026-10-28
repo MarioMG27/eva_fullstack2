@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../atoms/Button';
 import { FormField } from '../molecules/FormField';
+import { authService } from '../../services/authService';
 
 export interface ServiceItem {
   id: number;
@@ -16,26 +18,27 @@ interface ModuloAgendamientoProps {
 }
 
 export const ModuloAgendamiento: React.FC<ModuloAgendamientoProps> = ({ service, onClose }) => {
+  const navigate = useNavigate();
+  const user = authService.getCurrentUser();
+
   const [nombreMascota, setNombreMascota] = useState('');
   const [dueno, setDueno] = useState('');
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('08:00');
   const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
 
-  // Limpiar el estado cada vez que se selecciona un nuevo servicio o se abre el modal
   useEffect(() => {
     if (service) {
       setNombreMascota('');
-      setDueno('');
+      setDueno(user ? user.nombre : '');
       setFecha('');
       setHora('08:00');
       setConfirmationMessage(null);
     }
-  }, [service]);
+  }, [service, user]);
 
   if (!service) return null;
 
-  // Fecha actual en formato YYYY-MM-DD
   const todayDate = new Date().toISOString().split('T')[0];
 
   const handleOpenPicker = (e: React.MouseEvent<HTMLInputElement>) => {
@@ -56,15 +59,46 @@ export const ModuloAgendamiento: React.FC<ModuloAgendamientoProps> = ({ service,
     onClose();
   };
 
+  const handleIrALogin = () => {
+    onClose();
+    // Redirigir enviando en el state el servicio que se deseaba agendar
+    navigate('/login', { state: { pendingService: service } });
+  };
+
   const handleSubmitBooking = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombreMascota || !dueno || !fecha) return;
+    if (!user) return;
+    if (!nombreMascota || !fecha) return;
+
+    const nombreDuenoFinal = dueno || user.nombre;
+
+    const nuevaCita = {
+      id: Date.now(),
+      servicio: service.titulo,
+      paciente: nombreMascota,
+      dueno: nombreDuenoFinal,
+      fecha,
+      hora,
+      estado: 'Pendiente',
+    };
+
+    const savedCitas = localStorage.getItem('petshop_user_appointments');
+    let citasActuales = [];
+    if (savedCitas) {
+      try {
+        citasActuales = JSON.parse(savedCitas);
+      } catch (e) {
+        citasActuales = [];
+      }
+    }
+
+    const actualizadas = [nuevaCita, ...citasActuales];
+    localStorage.setItem('petshop_user_appointments', JSON.stringify(actualizadas));
 
     setConfirmationMessage(
       `¡Cita agendada con éxito para ${nombreMascota} (${service.titulo}) el ${fecha} a las ${hora} hrs!`
     );
 
-    // Tras 2.5 segundos se cierra el modal y se limpian los campos para permitir agendar otras citas
     setTimeout(() => {
       handleCloseModal();
     }, 2500);
@@ -89,15 +123,32 @@ export const ModuloAgendamiento: React.FC<ModuloAgendamientoProps> = ({ service,
             ></button>
           </div>
           <div className="modal-body p-4">
-            {confirmationMessage ? (
+            {!user ? (
+              <div className="text-center py-3">
+                <div className="fs-1 mb-2">🔒</div>
+                <h5 className="fw-bold text-dark mb-2">Inicio de Sesión Requerido</h5>
+                <p className="text-muted small mb-4">
+                  Para agendar una cita y vincularla a la historia médica de tu mascota, debes iniciar sesión con tu cuenta de cliente.
+                </p>
+                <div className="d-flex justify-content-center gap-2">
+                  <Button variant="secondary" onClick={handleCloseModal}>
+                    Cancelar
+                  </Button>
+                  <Button variant="primary" onClick={handleIrALogin}>
+                    🔑 Iniciar Sesión
+                  </Button>
+                </div>
+              </div>
+            ) : confirmationMessage ? (
               <div className="alert alert-success text-center my-3" role="alert">
                 <div className="fs-1 mb-2">✅</div>
                 <h6 className="fw-bold">{confirmationMessage}</h6>
+                <p className="small mb-0 text-muted">Podrás revisarla en tu sección "Mi Perfil"</p>
               </div>
             ) : (
               <form onSubmit={handleSubmitBooking}>
                 <FormField
-                  label="Nombre de la Mascota"
+                  label="Nombre de la Mascota / Paciente"
                   type="text"
                   placeholder="Ej: Max, Luna..."
                   value={nombreMascota}
@@ -105,7 +156,7 @@ export const ModuloAgendamiento: React.FC<ModuloAgendamientoProps> = ({ service,
                   required
                 />
                 <FormField
-                  label="Nombre del Dueño / Tutor"
+                  label="Nombre del Dueño / Tutor (Vinculado)"
                   type="text"
                   placeholder="Ej: Juan Pérez"
                   value={dueno}

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { TarjetaServicio, type ServicioItem } from '../molecules/TarjetaServicio';
-import { ModuloAgendamiento } from '../organisms/ModuloAgendamiento';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Button } from '../atoms/Button';
+import { ModuloAgendamiento, type ServiceItem } from '../organisms/ModuloAgendamiento';
 
-const SERVICIOS: ServicioItem[] = [
+const SERVICES: ServiceItem[] = [
   {
     id: 1,
     titulo: 'Consulta Médica General',
@@ -34,7 +35,16 @@ const SERVICIOS: ServicioItem[] = [
 ];
 
 export const ServicesPage: React.FC = () => {
-  const [servicioSeleccionado, setServicioSeleccionado] = useState<ServicioItem | null>(null);
+  const location = useLocation();
+  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
+
+  useEffect(() => {
+    // Si viene redirigido desde el Login tras identificarse, abre el modal del servicio solicitado
+    const continueService = (location.state as any)?.continueService;
+    if (continueService) {
+      setSelectedService(continueService);
+    }
+  }, [location]);
 
   return (
     <div className="py-3">
@@ -46,20 +56,38 @@ export const ServicesPage: React.FC = () => {
       </div>
 
       <div className="row row-cols-1 row-cols-md-2 g-4 mb-5">
-        {SERVICIOS.map((servicio) => (
+        {SERVICES.map((servicio) => (
           <div key={servicio.id} className="col">
-            <TarjetaServicio
-              servicio={servicio}
-              onSeleccionar={(s) => setServicioSeleccionado(s)}
-            />
+            <div className="card h-100 shadow-sm border-0 p-3 bg-light">
+              <div className="card-body d-flex flex-column">
+                <div className="d-flex align-items-center gap-3 mb-3">
+                  <span className="display-5">{servicio.icono}</span>
+                  <div>
+                    <h5 className="fw-bold text-dark mb-0">{servicio.titulo}</h5>
+                    <span className="badge bg-primary mt-1">{servicio.precio}</span>
+                  </div>
+                </div>
+                <p className="text-muted small flex-grow-1">{servicio.descripcion}</p>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="mt-2 w-100"
+                  onClick={() => setSelectedService(servicio)}
+                >
+                  Agendar Atención
+                </Button>
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
-      <ModuloAgendamiento
-        service={servicioSeleccionado}
-        onClose={() => setServicioSeleccionado(null)}
-      />
+      {selectedService && (
+        <ModuloAgendamiento
+          service={selectedService}
+          onClose={() => setSelectedService(null)}
+        />
+      )}
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { CartItem } from '../../types';
 import { CartRowItem } from '../molecules/CartRowItem';
 import { Button } from '../atoms/Button';
+import { authService } from '../../services/authService';
 
 interface CartPageProps {
   cart: CartItem[];
@@ -19,6 +20,7 @@ export const CartPage: React.FC<CartPageProps> = ({
 }) => {
   const navigate = useNavigate();
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+  const user = authService.getCurrentUser();
 
   const total = cart.reduce(
     (acc, item) => acc + item.product.precio * item.cantidad,
@@ -26,6 +28,30 @@ export const CartPage: React.FC<CartPageProps> = ({
   );
 
   const handleCheckout = () => {
+    // Si NO hay usuario con sesión iniciada, redirigir a Login guardando la intención de compra
+    if (!user) {
+      navigate('/login', { state: { fromCart: true } });
+      return;
+    }
+
+    // Registrar la compra asociada al usuario autenticado en localStorage
+    const nuevaOrden = {
+      id: Date.now(),
+      usuarioEmail: user.email,
+      usuarioNombre: user.nombre,
+      items: cart,
+      total,
+      fecha: new Date().toLocaleDateString('es-CL'),
+    };
+
+    const ordenesAnteriores = JSON.parse(
+      localStorage.getItem('petshop_user_orders') || '[]'
+    );
+    localStorage.setItem(
+      'petshop_user_orders',
+      JSON.stringify([nuevaOrden, ...ordenesAnteriores])
+    );
+
     setCheckoutSuccess(true);
     onClearCart();
   };
@@ -36,11 +62,16 @@ export const CartPage: React.FC<CartPageProps> = ({
         <div className="display-1 text-success mb-3">🎉</div>
         <h2 className="fw-bold text-success mb-2">¡Compra Realizada con Éxito!</h2>
         <p className="text-muted mb-4">
-          Gracias por tu pedido. Hemos procesado tu solicitud correctamente.
+          Gracias por tu pedido, <strong>{user?.nombre}</strong>. Hemos vinculado tu compra a tu cuenta ({user?.email}).
         </p>
-        <Button variant="primary" onClick={() => navigate('/tienda')}>
-          Volver a la Tienda
-        </Button>
+        <div className="d-flex justify-content-center gap-3">
+          <Button variant="primary" onClick={() => navigate('/tienda')}>
+            Volver a la Tienda
+          </Button>
+          <Button variant="success" onClick={() => navigate('/perfil', { state: { tab: 'compras' } })}>
+            Ver Mi Historial
+          </Button>
+        </div>
       </div>
     );
   }
@@ -68,6 +99,17 @@ export const CartPage: React.FC<CartPageProps> = ({
           Vaciar Carrito
         </Button>
       </div>
+
+      {!user && (
+        <div className="alert alert-warning d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert">
+          <div>
+            <strong>🔒 Inicio de sesión requerido para comprar:</strong> Debes estar identificado con tu cuenta para procesar tu pedido.
+          </div>
+          <Button variant="primary" size="sm" onClick={() => navigate('/login', { state: { fromCart: true } })}>
+            🔑 Iniciar Sesión
+          </Button>
+        </div>
+      )}
 
       <div className="row g-4">
         {/* Tabla de Productos */}
@@ -128,7 +170,7 @@ export const CartPage: React.FC<CartPageProps> = ({
               className="w-100 py-2 fs-6 fw-bold"
               onClick={handleCheckout}
             >
-              Finalizar Compra
+              {user ? 'Finalizar Compra' : 'Iniciar Sesión para Pagar'}
             </Button>
 
             <Link
