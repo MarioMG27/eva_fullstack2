@@ -74,6 +74,11 @@ export const Navbar: React.FC<NavbarProps> = ({ cartCount, user, onLogout }) => 
                 <Link className="nav-link text-info fw-bold" to="/recepcionista">Panel Recepción</Link>
               </li>
             )}
+            {(user?.rol === 'veterinario' || user?.rol === 'admin') && (
+              <li className="nav-item">
+                <Link className="nav-link text-primary fw-bold" to="/veterinario">Panel Veterinario</Link>
+              </li>
+            )}
           </ul>
 
           {/* Área de usuario y Carrito */}

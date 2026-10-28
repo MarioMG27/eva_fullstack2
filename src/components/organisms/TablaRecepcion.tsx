@@ -13,6 +13,10 @@ export interface ClienteAdmin {
   mascotas: RegistroMascota[];
 }
 
+interface TablaRecepcionProps {
+  permitirCrearCliente?: boolean; // Controla si se muestra el botón + Crear Cuenta de Cliente
+}
+
 const DEFAULT_CLIENTES: ClienteAdmin[] = [
   {
     id: 1,
@@ -48,7 +52,9 @@ const DEFAULT_CLIENTES: ClienteAdmin[] = [
   },
 ];
 
-export const TablaRecepcion: React.FC = () => {
+export const TablaRecepcion: React.FC<TablaRecepcionProps> = ({
+  permitirCrearCliente = true,
+}) => {
   const [clientes, setClientes] = useState<ClienteAdmin[]>([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteAdmin | null>(null);
   
@@ -164,12 +170,14 @@ export const TablaRecepcion: React.FC = () => {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="fw-bold mb-0">👥 Gestión de Clientes y Fichas Médicas</h4>
-        <Button
-          variant="success"
-          onClick={() => setMostrarModalCrearCliente(true)}
-        >
-          👤 + Crear Cuenta de Cliente
-        </Button>
+        {permitirCrearCliente && (
+          <Button
+            variant="success"
+            onClick={() => setMostrarModalCrearCliente(true)}
+          >
+            👤 + Crear Cuenta de Cliente
+          </Button>
+        )}
       </div>
 
       <div className="table-responsive mb-4">
@@ -179,7 +187,7 @@ export const TablaRecepcion: React.FC = () => {
               <th>Cliente / Tutor</th>
               <th>Contacto</th>
               <th>Mascotas</th>
-              <th className="text-end">Acciones Recepción</th>
+              <th className="text-end">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -259,7 +267,7 @@ export const TablaRecepcion: React.FC = () => {
       {mostrarModalMascota && clienteSeleccionado && (
         <FormularioAgregarMascota
           clientePreseleccionadoId={clienteSeleccionado.id}
-          onAgregar={(nuevaMascota) => handleAgregarMascotaCliente(nuevaMascota)}
+          onAgregar={handleAgregarMascotaCliente}
           onCerrar={() => setMostrarModalMascota(false)}
         />
       )}

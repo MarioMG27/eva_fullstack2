@@ -56,7 +56,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSubmit }) => {
 
       {/* Accesos rápidos para evaluación de roles */}
       <div>
-        <p className="small text-muted fw-bold mb-2">Prueba rápida por perfil:</p>
+        <p className="small text-muted fw-bold mb-2 text-center">Prueba rápida por perfil:</p>
         <div className="d-flex flex-column gap-2">
           <button
             type="button"
@@ -65,6 +65,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSubmit }) => {
           >
             🔑 <strong>Admin:</strong> admin@veterinaria.cl
           </button>
+          
           <button
             type="button"
             className="btn btn-outline-info btn-sm text-start text-dark"
@@ -72,6 +73,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSubmit }) => {
           >
             📋 <strong>Recepcionista:</strong> recepcion@veterinaria.cl
           </button>
+
+          <button
+            type="button"
+            className="btn btn-outline-primary btn-sm text-start"
+            onClick={() => handleQuickFill('veterinario@veterinaria.cl')}
+          >
+            🩺 <strong>Veterinario:</strong> veterinario@veterinaria.cl
+          </button>
+
           <button
             type="button"
             className="btn btn-outline-secondary btn-sm text-start"

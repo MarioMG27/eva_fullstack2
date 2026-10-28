@@ -11,7 +11,13 @@ interface PacienteConDueno {
   duenoTelefono: string;
 }
 
-export const BuscadorPacientes: React.FC = () => {
+interface BuscadorPacientesProps {
+  esModoVeterinario?: boolean;
+}
+
+export const BuscadorPacientes: React.FC<BuscadorPacientesProps> = ({
+  esModoVeterinario = false,
+}) => {
   const [busqueda, setBusqueda] = useState('');
   const [pacientes, setPacientes] = useState<PacienteConDueno[]>([]);
   const [pacienteSeleccionado, setPacienteSeleccionado] = useState<PacienteConDueno | null>(null);
@@ -37,7 +43,6 @@ export const BuscadorPacientes: React.FC = () => {
     }
   }, []);
 
-  // Filtrado dinámico según búsqueda por texto
   const pacientesFiltrados = pacientes.filter((item) => {
     const termino = busqueda.toLowerCase();
     const nombreMascota = item.mascota.nombre.toLowerCase();
@@ -142,7 +147,7 @@ export const BuscadorPacientes: React.FC = () => {
         </table>
       </div>
 
-      {/* Modal Ficha Médica del Paciente Seleccionado */}
+      {/* Modal Ficha Médica */}
       {pacienteSeleccionado && (
         <div
           className="modal fade show d-block"
@@ -162,7 +167,10 @@ export const BuscadorPacientes: React.FC = () => {
                 ></button>
               </div>
               <div className="modal-body p-4">
-                <FichaMascota mascota={pacienteSeleccionado.mascota} />
+                <FichaMascota
+                  mascota={pacienteSeleccionado.mascota}
+                  esModoVeterinario={esModoVeterinario}
+                />
               </div>
               <div className="modal-footer">
                 <Button variant="secondary" onClick={() => setPacienteSeleccionado(null)}>

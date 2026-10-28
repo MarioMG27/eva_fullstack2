@@ -72,6 +72,12 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id: 3,
+    nombre: 'Dr. Roberto Mella (Veterinario)',
+    email: 'veterinario@veterinaria.cl',
+    rol: 'veterinario'
+  },
+  {
+    id: 4,
     nombre: 'Cliente Prueba',
     email: 'cliente@gmail.com',
     rol: 'cliente'

@@ -17,6 +17,7 @@ import { CartPage } from './components/pages/CartPage';
 import { LoginPage } from './components/pages/LoginPage';
 import { AdminPage } from './components/pages/AdminPage';
 import { RecepcionistaPage } from './components/pages/RecepcionistaPage';
+import { VeterinarioPage } from './components/pages/VeterinarioPage';
 import { ClientePerfilPage } from './components/pages/ClientePerfilPage';
 
 export const App: React.FC = () => {
@@ -139,6 +140,14 @@ export const App: React.FC = () => {
             element={
               <ProtectedRoute user={user} allowedRoles={['recepcionista', 'admin']}>
                 <RecepcionistaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="veterinario"
+            element={
+              <ProtectedRoute user={user} allowedRoles={['veterinario', 'admin']}>
+                <VeterinarioPage />
               </ProtectedRoute>
             }
           />

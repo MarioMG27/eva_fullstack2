@@ -8,11 +8,13 @@ export interface Product {
   oferta?: boolean;
 }
 
+export type UserRole = 'cliente' | 'admin' | 'recepcionista' | 'veterinario';
+
 export interface User {
   id?: number;
   nombre: string;
   email: string;
-  rol: 'cliente' | 'admin' | 'recepcionista';
+  rol: UserRole;
 }
 
 export interface CartItem {
